@@ -55,7 +55,7 @@ fun HomeScreen(){
                 horizontalArrangement = Arrangement.SpaceBetween // Space items evenly
             ){
                 ProfilePicture(
-                    imageResource = R.drawable.profile_pic,
+                    imageResource = R.drawable.profile_img,
                     modifier = Modifier
                         .padding(top = 16.dp) // Add top and right padding
                 )
