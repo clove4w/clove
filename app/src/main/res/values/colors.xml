@@ -9,4 +9,13 @@
     <color name="white">#FFFFFFFF</color>
     <color name="btn">#67588A</color>
     <color name="reminder_background_color">#FFB5B2</color>
+
+    <!-- Figma Design Colors -->
+    <color name="primary_purple">#2D1B4E</color>
+    <color name="primary_purple_dark">#1A0F2E</color>
+    <color name="accent_pink">#E86A9B</color>
+    <color name="accent_yellow">#FFD700</color>
+    <color name="accent_blue">#5B7EFF</color>
+    <color name="meditation_pink">#E8D5D8</color>
+    <color name="button_pink">#E8A5C4</color>
 </resources>

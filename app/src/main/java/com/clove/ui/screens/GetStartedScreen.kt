@@ -1,7 +1,6 @@
 package com.clove.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -27,35 +25,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.Image
-import android.content.Context
-import androidx.compose.material3.AlertDialog
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.platform.LocalContext
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import coil.compose.rememberAsyncImagePainter
 import com.clove.R
 import com.clove.ui.component.ProfilePhotoPicker
-import com.clove.utils.AppPreferences
 import com.example.meditationapp.ui.components.ProfilePicture
 
 @Composable
-fun SettingsScreen(){
-    val context = LocalContext.current
-    val appPreferences = remember { AppPreferences(context) }
-    val userName = remember { mutableStateOf(appPreferences.getUserName()) }
-    val profilePhotoUri = remember { mutableStateOf(appPreferences.getProfilePhotoUri()) }
-    val showPhotoDialog = remember { mutableStateOf(false) }
+fun GetStartedScreen(onCompleteClick: (String, String?) -> Unit = { _, _ -> }) {
+    val userName = remember { mutableStateOf("") }
+    val profilePhotoUri = remember { mutableStateOf<String?>(null) }
 
     Box(
         modifier = Modifier
@@ -66,51 +50,31 @@ fun SettingsScreen(){
             modifier = Modifier
                 .fillMaxSize()
                 .padding(24.dp),
-            verticalArrangement = Arrangement.Top,
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Profile Photo Picker
+            ProfilePhotoPicker(
+                currentPhotoUri = profilePhotoUri.value,
+                onPhotoSelected = { uri ->
+                    profilePhotoUri.value = uri
+                }
+            )
+
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Profile Picture - Clickable to change
-            Box(
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFFD4B5D0))
-                    .clickable { showPhotoDialog.value = true },
-                contentAlignment = Alignment.Center
-            ) {
-                if (profilePhotoUri.value != null) {
-                    Image(
-                        painter = rememberAsyncImagePainter(model = profilePhotoUri.value),
-                        contentDescription = "Profile Photo",
-                        modifier = Modifier
-                            .size(80.dp)
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Text(
-                        text = "📷",
-                        fontSize = 36.sp
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(30.dp))
-
-            // Settings Card
+            // Welcome Card
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
                         color = Color.White,
-                        shape = RoundedCornerShape(20.dp)
+                        shape = RoundedCornerShape(25.dp)
                     )
-                    .padding(24.dp)
+                    .padding(horizontal = 24.dp, vertical = 32.dp)
             ) {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -123,7 +87,7 @@ fun SettingsScreen(){
                                 text = "Name",
                                 style = MaterialTheme.typography.bodyLarge.copy(
                                     fontSize = 18.sp,
-                                    color = Color.DarkGray
+                                    color = Color.LightGray
                                 )
                             )
                         },
@@ -138,12 +102,12 @@ fun SettingsScreen(){
                             focusedContainerColor = Color.White,
                             unfocusedContainerColor = Color.White,
                             focusedIndicatorColor = Color.Black,
-                            unfocusedIndicatorColor = Color.LightGray
+                            unfocusedIndicatorColor = Color.Gray
                         ),
                         singleLine = true
                     )
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
                     // Save Button
                     Box(
@@ -153,14 +117,16 @@ fun SettingsScreen(){
                         Button(
                             onClick = {
                                 if (userName.value.isNotEmpty()) {
-                                    appPreferences.saveUserName(userName.value)
+                                    onCompleteClick(userName.value, profilePhotoUri.value)
                                 }
                             },
+                            enabled = userName.value.isNotEmpty(),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = colorResource(id = R.color.accent_blue)
+                                containerColor = colorResource(id = R.color.accent_blue),
+                                disabledContainerColor = Color.Gray
                             ),
                             modifier = Modifier
-                                .size(width = 120.dp, height = 45.dp),
+                                .size(width = 100.dp, height = 45.dp),
                             shape = RoundedCornerShape(25.dp)
                         ) {
                             Text(
@@ -175,64 +141,13 @@ fun SettingsScreen(){
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // App Version Info
-            Text(
-                text = "App Version beta0.2",
-                style = MaterialTheme.typography.bodySmall.copy(
-                    fontSize = 12.sp,
-                    color = Color.White.copy(alpha = 0.7f)
-                )
-            )
-
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(60.dp))
         }
-    }
-
-    // Photo Picker Dialog
-    if (showPhotoDialog.value) {
-        val imagePickerLauncher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.GetContent()
-        ) { uri ->
-            uri?.let {
-                profilePhotoUri.value = it.toString()
-                appPreferences.saveProfilePhotoUri(it.toString())
-                showPhotoDialog.value = false
-            }
-        }
-
-        AlertDialog(
-            onDismissRequest = { showPhotoDialog.value = false },
-            title = {
-                Text("Update Profile Photo")
-            },
-            confirmButton = {
-                Button(
-                    onClick = { imagePickerLauncher.launch("image/*") },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colorResource(id = R.color.button_pink)
-                    )
-                ) {
-                    Text("Select Photo", color = Color.Black)
-                }
-            },
-            dismissButton = {
-                Button(
-                    onClick = { showPhotoDialog.value = false },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Gray
-                    )
-                ) {
-                    Text("Cancel", color = Color.White)
-                }
-            }
-        )
     }
 }
 
 @Preview
 @Composable
-fun SettingsScreenPreview() {
-    SettingsScreen()
+fun GetStartedScreenPreview() {
+    GetStartedScreen()
 }

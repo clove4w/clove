@@ -60,14 +60,18 @@ fun MainScreen() {
             // Floating Bottom Navigation Bar
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 70.dp),
+                    .fillMaxSize(),
                 contentAlignment = Alignment.BottomCenter
             ) {
-                BottomNavBar(
-                    navController = navController,
-                    currentRoute = currentRoute
-                )
+                Box(
+                    modifier = Modifier.padding(bottom = 40
+                        .dp)
+                ) {
+                    BottomNavBar(
+                        navController = navController,
+                        currentRoute = currentRoute
+                    )
+                }
             }
         }
     }

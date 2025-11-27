@@ -12,30 +12,79 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import coil.compose.rememberAsyncImagePainter
 import com.clove.R
 import com.clove.ui.component.Meditate_button
 import com.clove.ui.component.MoodInputBox
 import com.clove.ui.component.Sleep_Sound_button
+import com.clove.utils.AppPreferences
 import com.example.meditationapp.ui.components.ProfilePicture
+import kotlinx.coroutines.delay
 
 @Composable
-fun HomeScreen(){
+fun HomeScreen(navController: NavController? = null) {
+    val context = LocalContext.current
+    val appPreferences = remember { AppPreferences(context) }
+    val userName = remember { mutableStateOf(appPreferences.getUserName()) }
+    val profilePhotoUri = remember { mutableStateOf(appPreferences.getProfilePhotoUri()) }
+
+    val upcomingAlarm = remember { mutableStateOf(appPreferences.getNextUpcomingAlarm()) }
+    val countdownTime = remember { mutableStateOf("") }
+
+    // Update countdown every second
+    LaunchedEffect(upcomingAlarm.value) {
+        while (upcomingAlarm.value != null) {
+            val alarm = upcomingAlarm.value ?: break
+            val currentHour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+            val currentMinute = java.util.Calendar.getInstance().get(java.util.Calendar.MINUTE)
+            val currentSecond = java.util.Calendar.getInstance().get(java.util.Calendar.SECOND)
+
+            val alarmTotalMinutes = alarm.hour * 60 + alarm.minute
+            val currentTotalSeconds = currentHour * 3600 + currentMinute * 60 + currentSecond
+
+            val remainingSeconds = if (alarmTotalMinutes * 60 > currentTotalSeconds) {
+                alarmTotalMinutes * 60 - currentTotalSeconds
+            } else {
+                // Alarm is for tomorrow
+                (24 * 3600) - currentTotalSeconds + (alarmTotalMinutes * 60)
+            }
+
+            val hours = remainingSeconds / 3600
+            val minutes = (remainingSeconds % 3600) / 60
+            val seconds = remainingSeconds % 60
+
+            countdownTime.value = String.format("%02d:%02d:%02d", hours, minutes, seconds)
+
+            delay(1000L)
+        }
+    }
     Box(modifier = Modifier.fillMaxSize()){
         Image(
             painter = painterResource(id = R.drawable.homescreen_background),
@@ -45,93 +94,132 @@ fun HomeScreen(){
         )
         Column(
             modifier = Modifier
-                .padding(16.dp)
-                .align(Alignment.TopStart), // Align to the top-left corner
-            verticalArrangement = Arrangement.spacedBy(16.dp) // Space between rows
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.Top
         ) {
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(48.dp))
+
+            // Top Row: Profile and Add Icon
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween // Space items evenly
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ){
-                ProfilePicture(
-                    imageResource = R.drawable.profile_img,
+                // Profile Picture
+                Box(
                     modifier = Modifier
-                        .padding(top = 16.dp) // Add top and right padding
-                )
-
+                        .size(60.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFD4B5D0)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (profilePhotoUri.value != null) {
+                        Image(
+                            painter = rememberAsyncImagePainter(model = profilePhotoUri.value),
+                            contentDescription = "Profile Photo",
+                            modifier = Modifier
+                                .size(60.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Text("👤", fontSize = 28.sp)
+                    }
+                }
                 IconScreen()
             }
 
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Greeting and Timer Row
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween // Space items evenly
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
             ){
                 Column(
                     verticalArrangement = Arrangement.spacedBy(0.dp)
                 ){
                     Text(
                         text = "Good Morning",
-                        fontFamily = FontFamily.SansSerif, // Use your specific font family here
+                        fontFamily = FontFamily.SansSerif,
                         fontWeight = FontWeight.Light,
-                        fontSize = 18.sp,
-                        color = Color.White,
-                        modifier = Modifier.padding(0.dp)
+                        fontSize = 16.sp,
+                        color = Color.White
                     )
 
                     Text(
-                        text = "REYNA",
-                        fontFamily = FontFamily.SansSerif, // Use your specific font family here
+                        text = userName.value.uppercase(),
+                        fontFamily = FontFamily.SansSerif,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 30.sp,
-                        color = Color.White,
-                        modifier = Modifier.padding(0.dp)
+                        fontSize = 32.sp,
+                        color = Color.White
                     )
                 }
 
-                // Card for the timer box
-                Box(
-                    modifier = Modifier
-                        .width(160.dp) // Set the fixed width for the timer box
-                        .padding(0.dp) // Optional padding for spacing
-                        .background(
-                            color = colorResource(id = R.color.reminder_background_color), // Use custom color from colors.xml
-                            shape = RoundedCornerShape(16.dp) // Set background with rounded corners
-                        )
-                        .padding(0.dp) // Padding around the text inside the Box
-                        .height(70.dp), // Allow height to adjust to content size
-                    contentAlignment = Alignment.Center // Align the text in the center
-                ) {
-                    Column(
-                        modifier = Modifier.padding(0.dp) // Optional inner padding for text
+                // Timer box - Meditation Reminder
+                if (upcomingAlarm.value != null) {
+                    Box(
+                        modifier = Modifier
+                            .width(140.dp)
+                            .background(
+                                color = colorResource(id = R.color.button_pink),
+                                shape = RoundedCornerShape(20.dp)
+                            )
+                            .padding(12.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "Meditation Starts in :",
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.Black // Text color
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "Meditation Starts in :",
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color.Black
+                                ),
+                                textAlign = TextAlign.Center
                             )
-                        )
-                        Text(
-                            text = "10 PM",
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontSize = 30.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.Gray // Text color
+                            Text(
+                                text = countdownTime.value.ifEmpty { "00:00:00" },
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.DarkGray
+                                ),
+                                textAlign = TextAlign.Center
                             )
-                        )
+                        }
                     }
                 }
             }
-            MoodInputBox()
-            Column(modifier = Modifier.padding(10.dp)){
-                Spacer(modifier = Modifier.height(16.dp))
 
-                Meditate_button()
-                Spacer(modifier = Modifier.height(50.dp))
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Mood Input Box
+            MoodInputBox(
+                onStatsClick = {
+                    navController?.navigate("stats")
+                }
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Buttons Column
+            Column(modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .fillMaxWidth()){
+                Meditate_button(onClick = {
+                    navController?.navigate("meditation_focus")
+                })
+                Spacer(modifier = Modifier.height(32.dp))
                 Sleep_Sound_button()
-
             }
         }
     }

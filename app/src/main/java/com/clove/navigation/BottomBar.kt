@@ -23,6 +23,7 @@ import androidx.navigation.NavHostController
 import com.clove.R
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun BottomNavBar(
@@ -31,13 +32,13 @@ fun BottomNavBar(
 ) {
     Surface(
         modifier = Modifier
-            .padding(horizontal = 24.dp)
-            .height(75.dp)
+            .padding(horizontal = 40.dp)
+            .height(60.dp)
             .fillMaxWidth()
             .clip(RoundedCornerShape(40.dp)),
         tonalElevation = 8.dp,
         shadowElevation = 8.dp,
-        color = MaterialTheme.colorScheme.surface
+        color = Color.White.copy(alpha = 0.3f)
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
@@ -52,9 +53,9 @@ fun BottomNavBar(
             )
             BottomNavItem(
                 icon = R.drawable.ic_meditation,
-                label = "Meditate",
-                isSelected = currentRoute == "meditate",
-                onClick = { if (currentRoute != "meditate") navController.navigate("meditate") }
+                label = "Stress Relief",
+                isSelected = currentRoute == "stress_relief",
+                onClick = { if (currentRoute != "stress_relief") navController.navigate("stress_relief") }
             )
             BottomNavItem(
                 icon = R.drawable.ic_alarm,
@@ -81,7 +82,6 @@ fun BottomNavItem(
 ) {
     Column(
         modifier = Modifier
-            //.weight(1f)
             .clickable { onClick() }
             .padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -90,14 +90,8 @@ fun BottomNavItem(
         Icon(
             painter = painterResource(id = icon),
             contentDescription = label,
-            modifier = Modifier.size(24.dp),
+            modifier = Modifier.size(35.dp),
             tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = label,
-            fontSize = 11.sp,
-            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
         )
     }
 }

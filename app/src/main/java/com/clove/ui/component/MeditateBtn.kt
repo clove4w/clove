@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.sp
 import com.clove.R
 
 @Composable
-fun Meditate_button() {
+fun Meditate_button(onClick: () -> Unit = {}) {
 
     val boxShape = RoundedCornerShape(60.dp) // Define rounded corners for the box
     val borderColor = Color.White.copy(alpha = 0.5f) // Set the border color with 50% opacity
@@ -40,7 +40,7 @@ fun Meditate_button() {
         modifier = Modifier
             .fillMaxWidth()
             .height(120.dp)
-            .clickable(onClick = {  }) // Make the box clickable
+            .clickable(onClick = onClick) // Make the box clickable
             .clip(boxShape) // Apply rounded corners
             .border(3.dp, borderColor, boxShape) // Border with 50% opacity
     ) {

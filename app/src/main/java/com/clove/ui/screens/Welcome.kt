@@ -48,7 +48,7 @@ val JaldiFontFamily = FontFamily(
 )
 
 @Composable
-fun WelcomeScreen(navController: NavController) {
+fun WelcomeScreen(onContinueClick: () -> Unit = {}) {
     // Add an infinite transition for the animation
     val infiniteTransition = rememberInfiniteTransition()
     val scale by infiniteTransition.animateFloat(
@@ -139,7 +139,7 @@ fun WelcomeScreen(navController: NavController) {
             }
             // Button
             Button(
-                onClick = { navController.navigate("username") },
+                onClick = onContinueClick,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = colorResource(id = R.color.btn),
                 ),
@@ -161,5 +161,5 @@ fun WelcomeScreen(navController: NavController) {
 @Preview
 @Composable
 fun WelcomeScreenPreview() {
-    WelcomeScreen(navController = NavController(LocalContext.current))
+    WelcomeScreen()
 }
